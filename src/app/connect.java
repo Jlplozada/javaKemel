@@ -3,10 +3,11 @@ package app;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
 public class connect {
 
-    private static final String URL = "jdbc:mysql://kemel.online:3306/kemelOnline";
+    private static final String URL = "jdbc:mysql://kemel.online/kemlOnline";
     private static final String USER = "kemelOnlineJava";
     private static final String PASSWORD = "Kemel2025@";
 
@@ -27,9 +28,12 @@ public class connect {
     public static void main(String[] args) {
         Connection conn = getConnection();
         if (conn != null) {
-            System.out.println("Conexión exitosa a la base de datos.");
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                new login().setVisible(true);
+            });
         } else {
-            System.out.println("Conexión fallida.");
+        	//el joptionpane permite visualizar el mensaje de error de conexion 
+            JOptionPane.showMessageDialog(null, "Perdón, no se puede conectar con la base de datos", "kemel Online", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
