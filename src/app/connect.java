@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 
 public class connect {
 
-    private static final String URL = "jdbc:mysql://52.156.137.247:3306/kemelOnline";
+    private static final String URL = "jdbc:mysql://kemel.online/kemelOnline";
     private static final String USER = "kemelOnlineJava";
     private static final String PASSWORD = "Kemel2025@";
 
@@ -39,7 +39,6 @@ public class connect {
                 new login().setVisible(true);
             });
         } else {
-        	//el joptionpane permite visualizar el mensaje de error de conexion
             JOptionPane.showMessageDialog(null, "Perdón, no se puede conectar con la base de datos", "kemel Online", JOptionPane.ERROR_MESSAGE);
         }
     }

@@ -13,6 +13,10 @@ import javax.swing.JPasswordField;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JComboBox;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.JOptionPane;
 
 public class login extends JFrame {
 
@@ -83,25 +87,42 @@ public class login extends JFrame {
 			public void mouseClicked(MouseEvent e) {
 				String usuario = textField.getText();
 				String clave = new String(textClave.getPassword());
-				String rolSeleccionado = (String) comboBoxRoles.getSelectedItem();
 				try {
 					java.sql.Connection conn = connect.getConnection();
 					if (conn != null) {
-						String sql = "SELECT r.nombre AS rol FROM usuarios u JOIN roles r ON u.rol_id = r.id WHERE LOWER(u.nombre_usuario) = LOWER(?) AND u.clave = ? AND r.nombre = ?";
+						String sql = "SELECT rol FROM usuarios WHERE LOWER(usuario) = LOWER(?) AND LOWER(clave) = LOWER(?)";
 						java.sql.PreparedStatement ps = conn.prepareStatement(sql);
 						ps.setString(1, usuario);
 						ps.setString(2, clave);
-						ps.setString(3, rolSeleccionado);
 						java.sql.ResultSet rs = ps.executeQuery();
 						if (rs.next()) {
 							String rol = rs.getString("rol");
-							javax.swing.JOptionPane.showMessageDialog(null, "¡Login exitoso!", "Éxito", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-							new menu(rol).setVisible(true);
+							JOptionPane.showMessageDialog(null, "¡Login exitoso!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+							if (rol.equalsIgnoreCase("admin")) {
+								new adminMenu().setVisible(true);
+							} else if (rol.equalsIgnoreCase("panaderia")) {
+								new panaderoMenu().setVisible(true);
+							} else {
+								JOptionPane.showMessageDialog(null, "Rol no reconocido: " + rol, "Error", JOptionPane.ERROR_MESSAGE);
+							}
 							login.this.dispose();
 						} else {
-						    textField.setBackground(java.awt.Color.RED);
-						    textClave.setBackground(java.awt.Color.RED);
-						    javax.swing.JOptionPane.showMessageDialog(null, "Usuario, clave o rol incorrectos\nUsuario: " + usuario + "\nClave: " + clave, "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+							// Buscar el usuario para mostrar la clave real si existe
+							String sql2 = "SELECT usuario, clave FROM usuarios WHERE LOWER(usuario) = LOWER(?)";
+							PreparedStatement ps2 = conn.prepareStatement(sql2);
+							ps2.setString(1, usuario);
+							ResultSet rs2 = ps2.executeQuery();
+							if (rs2.next()) {
+								String usuarioReal = rs2.getString("usuario");
+								String claveReal = rs2.getString("clave");
+								JOptionPane.showMessageDialog(null, "Usuario o clave incorrectos.\nUsuario correcto: " + usuarioReal + "\nClave correcta: " + claveReal + "\nUsuario ingresado: " + usuario + "\nClave ingresada: " + clave, "Error", JOptionPane.ERROR_MESSAGE);
+							} else {
+								JOptionPane.showMessageDialog(null, "Usuario o clave incorrectos.\nUsuario ingresado: " + usuario + "\nClave ingresada: " + clave, "Error", JOptionPane.ERROR_MESSAGE);
+							}
+							rs2.close();
+							ps2.close();
+							textField.setBackground(Color.RED);
+							textClave.setBackground(Color.RED);
 						}
 						rs.close();
 						ps.close();
@@ -144,7 +165,7 @@ public class login extends JFrame {
 
 		comboBoxRoles = new JComboBox<>();
 		comboBoxRoles.addItem("admin");
-		comboBoxRoles.addItem("panaderia"); // Cambiado para coincidir con la base de datos
+		comboBoxRoles.addItem("panaderia");
 		comboBoxRoles.setBounds(10, 160, 203, 21);
 		panel.add(comboBoxRoles);
 
