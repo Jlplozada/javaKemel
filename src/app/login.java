@@ -26,10 +26,8 @@ public class login extends JFrame {
 	private JPasswordField textClave;
 	private JLabel lblNewLabel_1;
 	private JComboBox<String> comboBoxRoles;
+	public static boolean isAdmin = false;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 	    EventQueue.invokeLater(new Runnable() {
 	        public void run() {
@@ -43,9 +41,6 @@ public class login extends JFrame {
 	    });
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public login() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 762, 341);
@@ -97,17 +92,14 @@ public class login extends JFrame {
 						java.sql.ResultSet rs = ps.executeQuery();
 						if (rs.next()) {
 							String rol = rs.getString("rol");
-							JOptionPane.showMessageDialog(null, "¡Login exitoso!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-							if (rol.equalsIgnoreCase("admin")) {
+							isAdmin = rol.equalsIgnoreCase("admin");
+							if (isAdmin) {
 								new adminMenu().setVisible(true);
-							} else if (rol.equalsIgnoreCase("panaderia")) {
-								new panaderoMenu().setVisible(true);
 							} else {
-								JOptionPane.showMessageDialog(null, "Rol no reconocido: " + rol, "Error", JOptionPane.ERROR_MESSAGE);
+								new panaderoMenu().setVisible(true);
 							}
 							login.this.dispose();
 						} else {
-							// Buscar el usuario para mostrar la clave real si existe
 							String sql2 = "SELECT usuario, clave FROM usuarios WHERE LOWER(usuario) = LOWER(?)";
 							PreparedStatement ps2 = conn.prepareStatement(sql2);
 							ps2.setString(1, usuario);
@@ -115,9 +107,11 @@ public class login extends JFrame {
 							if (rs2.next()) {
 								String usuarioReal = rs2.getString("usuario");
 								String claveReal = rs2.getString("clave");
-								JOptionPane.showMessageDialog(null, "Usuario o clave incorrectos.\nUsuario correcto: " + usuarioReal + "\nClave correcta: " + claveReal + "\nUsuario ingresado: " + usuario + "\nClave ingresada: " + clave, "Error", JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showMessageDialog(null, "Usuario o clave incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
 							} else {
-								JOptionPane.showMessageDialog(null, "Usuario o clave incorrectos.\nUsuario ingresado: " + usuario + "\nClave ingresada: " + clave, "Error", JOptionPane.ERROR_MESSAGE);
+								JOptionPane.showMessageDialog(null, "Usuario o clave incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+								textField.setBackground(Color.RED);
+								textClave.setBackground(Color.RED);
 							}
 							rs2.close();
 							ps2.close();
@@ -127,9 +121,7 @@ public class login extends JFrame {
 						rs.close();
 						ps.close();
 						conn.close();
-					} else {
-						javax.swing.JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos", "kemel", javax.swing.JOptionPane.ERROR_MESSAGE);
-					}
+					} 
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					javax.swing.JOptionPane.showMessageDialog(null, "Usuario no valido", "kemel", javax.swing.JOptionPane.ERROR_MESSAGE);
